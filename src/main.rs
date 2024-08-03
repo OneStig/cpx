@@ -5,7 +5,7 @@ use std::process::Command;
 mod config;
 mod server;
 use config::{load_config, Config};
-use server::start_listening;
+use server::listen;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -30,20 +30,17 @@ fn main() -> std::io::Result<()> {
     match &args.cmd {
         Cmd::Listen => listen(&user_cfg),
         Cmd::Build => build(&user_cfg),
-        Cmd::Run { test_number } => match test_number {
-            Some(number) => println!("Running test #{}", number),
-            None => println!("Running all tests"),
-        },
+        Cmd::Run { test_number } => {
+            match test_number {
+                Some(number) => println!("Running test #{}", number),
+                None => println!("Running all tests"),
+            };
+            Ok(())
+        }
     }
-
-    Ok(())
 }
 
-fn listen(cfg: &Config) {
-    start_listening(&cfg);
-}
-
-fn build(cfg: &Config) {
+fn build(cfg: &Config) -> std::io::Result<()> {
     let build_cmd = Command::new(&cfg.compile_command)
         .args(&cfg.compile_args)
         .output()
@@ -53,4 +50,6 @@ fn build(cfg: &Config) {
     let stderr = str::from_utf8(&build_cmd.stderr).unwrap();
 
     println!("{}\n{}", stdout, stderr);
+
+    Ok(())
 }
