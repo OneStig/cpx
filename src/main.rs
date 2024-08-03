@@ -1,6 +1,8 @@
 use clap::{Parser, Subcommand};
 use core::str;
-use std::process::Command;
+use std::fs::File;
+use std::path::Path;
+use std::process::{Command, Stdio};
 
 mod config;
 mod server;
@@ -32,12 +34,43 @@ fn main() -> std::io::Result<()> {
         Cmd::Build => build(&user_cfg),
         Cmd::Run { test_number } => {
             match test_number {
-                Some(number) => println!("Running test #{}", number),
-                None => println!("Running all tests"),
+                Some(number) => run_test(number, &user_cfg)?,
+                None => {
+                    let mut current_test = 1;
+                    loop {
+                        let file_name = format!("input{}", current_test);
+                        let file_path = Path::new(&file_name);
+
+                        if file_path.exists() {
+                            run_test(&current_test, &user_cfg)?;
+                            current_test += 1;
+                        } else {
+                            break;
+                        }
+                    }
+                }
             };
             Ok(())
         }
     }
+}
+
+fn run_test(num: &i32, cfg: &Config) -> std::io::Result<()> {
+    // TODO: check tle, mle + compare against output
+    println!("Running test {}", num);
+    let test_file = File::open(format!("input{}", num)).expect("Test case doesn't exist");
+
+    let run_cmd = Command::new(&cfg.run_command)
+        .stdin(Stdio::from(test_file))
+        .output()
+        .unwrap();
+
+    let stdout = str::from_utf8(&run_cmd.stdout).unwrap();
+    let stderr = str::from_utf8(&run_cmd.stderr).unwrap();
+
+    println!("{}\n{}", stdout, stderr);
+
+    Ok(())
 }
 
 fn build(cfg: &Config) -> std::io::Result<()> {

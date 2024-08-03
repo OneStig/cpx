@@ -8,6 +8,7 @@ use std::path::PathBuf;
 #[derive(Serialize, Deserialize)]
 pub struct Config {
     pub compile_command: String,
+    pub run_command: String,
     pub compile_args: Vec<String>,
     pub contest_directory: String,
     pub cpp_template: String,
@@ -32,6 +33,7 @@ pub fn load_config() -> Config {
 fn default_config() -> Config {
     let default = Config {
         compile_command: "g++".into(),
+        run_command: "./cpp.out".into(),
         compile_args: vec![
             "solution.cpp".into(),
             "-o".into(),
