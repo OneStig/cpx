@@ -10,6 +10,8 @@ pub struct Config {
     pub compile_command: String,
     pub compile_args: Vec<String>,
     pub contest_directory: String,
+    pub cpp_template: String,
+    pub port: i32,
 }
 
 pub fn load_config() -> Config {
@@ -43,12 +45,15 @@ fn default_config() -> Config {
                 "/".into()
             }
         },
+        cpp_template: "".into(),
+        port: 27121,
     };
 
     if let Some(home_path) = home_dir() {
         let mut config_path = PathBuf::from(home_path);
         config_path.push("cpx.json");
 
+        // Clean this up later but it shouldn't matter too much I think
         let json = serde_json::to_string_pretty(&default).expect("Uh oh");
         let mut file = fs::File::create(&config_path).expect("Uh oh");
 
