@@ -63,7 +63,7 @@ fn save_problem(problem: &ProblemData, cfg: &Config) -> std::io::Result<()> {
         problem_path = problem_path.join(sanitize_filename(part))
     }
 
-    let problem_name = sanitize_filename(&problem.name.split('-').last().unwrap());
+    let problem_name = sanitize_filename(&problem.name);
     problem_path = problem_path.join(problem_name);
 
     fs::create_dir_all(&problem_path)?;
