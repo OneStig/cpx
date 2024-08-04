@@ -2,7 +2,7 @@ use clap::{Parser, Subcommand};
 use core::str;
 use std::fs::File;
 use std::path::Path;
-use std::process::{Command, Stdio};
+use std::process::{Command, Output, Stdio};
 
 mod config;
 mod server;
@@ -65,10 +65,7 @@ fn run_test(num: &i32, cfg: &Config) -> std::io::Result<()> {
         .output()
         .unwrap();
 
-    let stdout = str::from_utf8(&run_cmd.stdout).unwrap();
-    let stderr = str::from_utf8(&run_cmd.stderr).unwrap();
-
-    println!("{}\n{}", stdout, stderr);
+    std_stream(&run_cmd);
 
     Ok(())
 }
@@ -79,10 +76,20 @@ fn build(cfg: &Config) -> std::io::Result<()> {
         .output()
         .unwrap();
 
-    let stdout = str::from_utf8(&build_cmd.stdout).unwrap();
-    let stderr = str::from_utf8(&build_cmd.stderr).unwrap();
-
-    println!("{}\n{}", stdout, stderr);
+    std_stream(&build_cmd);
 
     Ok(())
+}
+
+fn std_stream(from_cmd: &Output) {
+    let stdout = str::from_utf8(&from_cmd.stdout).unwrap();
+    let stderr = str::from_utf8(&from_cmd.stderr).unwrap();
+
+    if !stdout.trim().is_empty() {
+        println!("{}", stdout.trim());
+    }
+
+    if !stderr.trim().is_empty() {
+        println!("{}", stderr.trim());
+    }
 }

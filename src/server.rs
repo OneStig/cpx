@@ -69,7 +69,10 @@ fn save_problem(problem: &ProblemData, cfg: &Config) -> std::io::Result<()> {
     fs::create_dir_all(&problem_path)?;
 
     let solution_file = problem_path.join("solution.cpp");
-    write_file(&solution_file, &cfg.cpp_template)?;
+    let template_content =
+        fs::read_to_string(PathBuf::from(&cfg.cpp_template)).unwrap_or_else(|_| String::new());
+
+    write_file(&solution_file, &template_content)?;
 
     for (num, case) in problem.tests.iter().enumerate() {
         let input_file = problem_path.join(format!("input{}", num + 1));
